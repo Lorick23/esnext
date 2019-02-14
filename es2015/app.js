@@ -139,73 +139,95 @@ class FreeTrip extends Trip {
 const freeTrip = new FreeTrip("nantes", "Nantes", "img/nantes.jpg");
 console.log(freeTrip.toString());
 
-
-
-
-
-// Si aucun voyage ne correspond au nom en paramètre, renvoyer une erreur No trip with name xxx.
-// Compléter la méthode findPriceByTripId pour qu'elle renvoie une promesse.
-// Utiliser la méthode setTimeout(fn,delay) pour créer une latence de 2s.
-// Renvoyer la valeur du prix si trouvé
-// Si aucun prix trouvé, renvoyer l'erreur No price found for id xxxx.
-// Créer une instance de TripService et une instance de PriceService.
-// Effectuer une recherche par nom de voyage avec la valeur Paris. Afficher dans la console le résultat trouvé.
-
 class TripService {
 
     // Compléter le constructeur de la classe TripService pour initialiser un Set de 3 objet Trip.
     constructor() {
-        let trips = new Set();
-        trips.add(new Trip('paris', 'Paris', 'img/paris.jpg'));
-        trips.add(new Trip('nantes', 'Nantes', 'img/nantes.jpg'));
-        trips.add(new Trip('rio-de-janeiro', 'Rio de Janeiro', 'img/rio-de-janeiro.jpg'));
-        this.trips = trips;
+        this.trips = new Set();
+        this.trips.add(new Trip('paris', 'Paris', 'img/paris.jpg'));
+        this.trips.add(new Trip('nantes', 'Nantes', 'img/nantes.jpg'));
+        this.trips.add(new Trip('rio-de-janeiro', 'Rio de Janeiro', 'img/rio-de-janeiro.jpg'));
     }
 
     // Compléter la méthode findByName(tripName) pour qu'elle renvoie une promesse.
     // Pour simuler une récupération des données distantes, utiliser la méthode setTimeout(fn,delay) pour créer une latence de 2s.
-    
+    // Si aucun voyage ne correspond au nom en paramètre, renvoyer une erreur No trip with name xxx.
+
     findByName(tripName) {
 
         return new Promise((resolve, reject) => {
 
             setTimeout(() => {
-                // Renvoyer l'objet Trip correspondant au nom du voyage en paramètre.
-                if(!this.trips.has(tripName)){
-                    reject("no trip");
-                }
+
                 this.trips.forEach(e => {
-                    if(e.name == tripName){
+                    if (e.name === tripName) {
                         resolve(e);
                     }
-                });
-            }, 2000)
+                })
+                reject("No trip found with name " + tripName);
+
+            }, 200)
         });
     }
 }
-
-let tp = new TripService();
-console.log(tp.findByName("paris"));
 
 class PriceService {
 
     // Compléter le constructeur de la classe PriceService pour initialiser une Map (clé = identifiant voyage, valeur = prix). Stocker y 2 prix pour les villes Paris et Rio de Janeiro.
     constructor() {
         this.map = new Map();
-        map.set("Paris", 100);
-        map.set("Rio de Janeiro", 800);
+        this.map.set("Paris", 100);
+        this.map.set("Rio de Janeiro", 800);
     }
 
     findPriceByTripId(tripId) {
 
         return new Promise((resolve, reject) => {
 
+            // Compléter la méthode findPriceByTripId pour qu'elle renvoie une promesse.
+            // Utiliser la méthode setTimeout(fn,delay) pour créer une latence de 2s.
+            // Renvoyer la valeur du prix si trouvé
+            // Si aucun prix trouvé, renvoyer l'erreur No price found for id xxxx.
             setTimeout(() => {
-                // ici l'exécution du code est asynchrone
-
-                // TODO utiliser resolve et reject en fonction du résultat de la recherche
-
+                for (let [id, price] of this.map) {
+                    if(id === tripId){
+                        resolve(price);
+                    }
+                }
+                reject("No price found for id "+tripId);
             }, 2000)
         });
     }
 }
+
+// Créer une instance de TripService et une instance de PriceService.
+// Effectuer une recherche par nom de voyage avec la valeur Paris. Afficher dans la console le résultat trouvé.
+ let tp = new TripService();
+ let ps = new PriceService();
+tp.findByName("Paris").then(function (trip) {
+    console.log(trip);
+}, function (error) {
+    console.log(error);
+});
+
+//Chainer l'utilisation des services TripService et PriceService pour récupérer le prix du voyage 'Rio de Janeiro'.
+tp.findByName("Rio de Janeiro").then(function (trip) {
+    return ps.findPriceByTripId(trip.name);
+}, function (error) {
+    console.log(error);
+}).then(function (price) {
+    console.log(price);
+}, function (error) {
+    console.log(error);
+});
+
+//Chainer l'utilisation des services TripService et PriceService pour récupérer le prix du voyage 'Nantes'.
+tp.findByName("Nantes").then(function (trip) {
+    return ps.findPriceByTripId(trip.name);
+}, function (error) {
+    console.log(error);
+}).then(function (price) {
+    console.log(price);
+}, function (error) {
+    console.log(error);
+});
